@@ -3,10 +3,14 @@ import os
 import requests
 from whisper import load_model, load_audio
 from redis import from_url
+import time
 
 BEARER = os.environ.get("BEARER")
 REDIS_URL = os.environ.get("REDIS_URL")
 QUEUE_KEY = os.environ.get("QUEUE_KEY")
+print("BEARER", BEARER)
+print("REDIS_URL", REDIS_URL)
+print("QUEUE_KEY", QUEUE_KEY)
 
 redis = from_url(REDIS_URL)
 
@@ -68,6 +72,7 @@ def process_message(message):
 if __name__ == "__main__":
     print(f"Working in: {os.getcwd()}")
     model = init_whisper()
+    print("Whisper initialised")
     while True:
         try:
             (_, encoded) = redis.blpop([QUEUE_KEY])
@@ -84,3 +89,5 @@ if __name__ == "__main__":
             print(f"{count} messages processed")
         except Exception as e:
             print(e)
+            # To avoid overwhelming errors in the while loop
+            time.sleep(1)
