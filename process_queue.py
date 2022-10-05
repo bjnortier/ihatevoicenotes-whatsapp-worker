@@ -72,7 +72,7 @@ def process_message(message):
 if __name__ == "__main__":
     print(f"Working in: {os.getcwd()}")
     model = init_whisper()
-    print("Whisper initialised")
+    print("Whisper initialised.")
     while True:
         try:
             (_, encoded) = redis.blpop([QUEUE_KEY])
