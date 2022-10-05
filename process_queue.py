@@ -8,9 +8,7 @@ import time
 BEARER = os.environ.get("BEARER")
 REDIS_URL = os.environ.get("REDIS_URL")
 QUEUE_KEY = os.environ.get("QUEUE_KEY")
-print("BEARER", BEARER)
-print("REDIS_URL", REDIS_URL)
-print("QUEUE_KEY", QUEUE_KEY)
+PHONE_NUMBER_ID = os.environ.get("PHONE_NUMBER_ID")
 
 redis = from_url(REDIS_URL)
 
@@ -39,7 +37,7 @@ def get_media(url):
 
 
 def send_text(number, text):
-    url = "https://graph.facebook.com/v14.0/101254459434414/messages"
+    url = f"https://graph.facebook.com/v14.0/{PHONE_NUMBER_ID}/messages"
     headers = {"Authorization": f"Bearer {BEARER}", "Content-Type": "application/json"}
     payload = {"messaging_product": "whatsapp", "to": number, "text": {"body": text}}
     response = requests.post(url, data=json.dumps(payload), headers=headers)
@@ -73,11 +71,12 @@ if __name__ == "__main__":
     print(f"Working in: {os.getcwd()}")
     model = init_whisper()
     print("Whisper initialised.")
+    print("queue size:", redis.llen(QUEUE_KEY))
     while True:
         try:
             (_, encoded) = redis.blpop([QUEUE_KEY])
             message = json.loads(encoded)
-            print(message)
+            print("<<", message)
             count = 0
             for entry in message["entry"]:
                 for change in entry["changes"]:
